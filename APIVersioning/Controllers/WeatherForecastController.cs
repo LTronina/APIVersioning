@@ -3,25 +3,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace APIVersioning.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    [Route("WeatherForecast")]
+    [ApiVersion("2.0")]
+    [ApiVersion("1.0", Deprecated = true)]
+    public class WeatherForecastV1Controller : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<WeatherForecastV1Controller> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastV1Controller(ILogger<WeatherForecastV1Controller> logger)
         {
             _logger = logger;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [MapToApiVersion("2.0")]
+        public IEnumerable<WeatherForecast> GetV2()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Enumerable.Range(1, 2).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = Random.Shared.Next(-20, 55),
@@ -29,5 +32,19 @@ namespace APIVersioning.Controllers
             })
             .ToArray();
         }
+
+        [HttpGet(Name = "GetWeatherForecast")]
+        [MapToApiVersion("1.0")]
+        public IEnumerable<WeatherForecast> GetV1()
+        {
+            return Enumerable.Range(1, 1).Select(index => new WeatherForecast
+            {
+                Date = DateTime.Now.AddDays(index),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+
     }
 }
